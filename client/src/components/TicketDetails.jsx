@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
     getTicket,
     updateTicket,
+    analyzeTicket,
 } from "../services/ticketApi";
 
 function TicketDetails({ ticketId, onBack }) {
@@ -14,6 +15,10 @@ function TicketDetails({ ticketId, onBack }) {
 
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+
+    const [aiAnalysis, setAiAnalysis] = useState(null);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiError, setAiError] = useState("");
 
     useEffect(() => {
         loadTicket();
@@ -82,6 +87,24 @@ function TicketDetails({ ticketId, onBack }) {
             setError(error.message || "Failed to add note.");
         } finally {
             setSaving(false);
+        }
+    }
+
+    async function handleAnalyzeTicket() {
+        try {
+            setAiLoading(true);
+            setAiError("");
+
+            const result = await analyzeTicket(ticketId);
+
+            setAiAnalysis(result.analysis);
+        } catch (error) {
+            console.error(error);
+            setAiError(
+                error.message || "Failed to analyze ticket."
+            );
+        } finally {
+            setAiLoading(false);
         }
     }
 
@@ -182,6 +205,83 @@ function TicketDetails({ ticketId, onBack }) {
                                 {ticket.description}
                             </p>
                         </div>
+                    </section>
+
+                    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h3 className="text-lg font-semibold text-slate-900">
+                                    AI Ticket Intelligence
+                                </h3>
+
+                                <p className="mt-1 text-sm text-slate-500">
+                                    Generate a concise summary, priority, and category for this ticket.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={handleAnalyzeTicket}
+                                disabled={aiLoading}
+                                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {aiLoading ? "Analyzing..." : "Analyze Ticket"}
+                            </button>
+                        </div>
+
+                        {aiError && (
+                            <div className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                                {aiError}
+                            </div>
+                        )}
+
+                        {aiLoading && (
+                            <div className="mt-5 rounded-lg bg-slate-50 p-5 text-sm text-slate-500">
+                                Analyzing ticket with AI...
+                            </div>
+                        )}
+
+                        {aiAnalysis && (
+                            <div className="mt-5 grid gap-4">
+                                <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+                                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                                        Summary
+                                    </p>
+
+                                    <p className="mt-2 leading-6 text-slate-700">
+                                        {aiAnalysis.summary}
+                                    </p>
+                                </div>
+
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+                                        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                                            Priority
+                                        </p>
+
+                                        <p className="mt-2 text-lg font-semibold text-slate-900">
+                                            {aiAnalysis.priority}
+                                        </p>
+                                    </div>
+
+                                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+                                        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                                            Category
+                                        </p>
+
+                                        <p className="mt-2 text-lg font-semibold text-slate-900">
+                                            {aiAnalysis.category}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {!aiAnalysis && !aiLoading && !aiError && (
+                            <div className="mt-5 rounded-lg bg-slate-50 p-5 text-sm text-slate-500">
+                                No AI analysis generated yet.
+                            </div>
+                        )}
                     </section>
 
                     <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">

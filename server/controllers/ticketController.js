@@ -1,5 +1,7 @@
 const supabase = require("../config/supabase");
-
+const {
+    sendTicketToN8n,
+} = require("../services/n8n");
 
 // create Ticket 
 const createTicket = async (req, res) => {
@@ -78,6 +80,9 @@ const createTicket = async (req, res) => {
         if (insertError) {
             throw insertError;
         }
+
+        // send to n8n automation
+        await sendTicketToN8n(ticket);
 
         return res.status(201).json({
             ticket_id: ticket.ticket_id,

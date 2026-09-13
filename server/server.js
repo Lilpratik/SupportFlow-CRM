@@ -4,6 +4,7 @@ require("dotenv").config();
 
 const supabase = require("./config/supabase");
 const ticketRoutes = require("./routes/ticketRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/tickets", ticketRoutes);
+app.use("/api/ai", aiRoutes);
 
 // Database connection test
 app.get("/api/health", async (req, res) => {

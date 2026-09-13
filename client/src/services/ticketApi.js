@@ -70,3 +70,15 @@ export async function updateTicket(ticketId, updateData) {
 
     return handleResponse(response);
 }
+
+
+export async function analyzeTicket(ticketId) {
+    const response = await fetch(
+        `${API_URL}/ai/tickets/${encodeURIComponent(ticketId)}/analyze`,
+        {
+            method: "POST",
+        }
+    );
+
+    return handleResponse(response);
+}
